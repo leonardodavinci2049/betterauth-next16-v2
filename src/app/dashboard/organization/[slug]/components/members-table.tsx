@@ -10,7 +10,6 @@ import {
 import type { Member } from "@/db/schema";
 import MembersTableAction from "./members-table-action";
 
-
 type MembersTableProps = {
   members: Member[];
 };

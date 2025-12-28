@@ -4,8 +4,8 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { removeMember } from "@/server/members";
 import { Button } from "@/components/ui/button";
+import { removeMember } from "@/server/members";
 
 export default function MembersTableAction({ memberId }: { memberId: string }) {
   const [isLoading, setIsLoading] = useState(false);

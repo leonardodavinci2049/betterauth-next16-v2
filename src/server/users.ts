@@ -3,7 +3,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-
 import { auth } from "@/lib/auth";
 
 export const getCurrentUser = async () => {
@@ -14,8 +13,8 @@ export const getCurrentUser = async () => {
   if (!session) {
     redirect("/login");
   }
-const currentUser ={};
-/*   const currentUser = await db.query.user.findFirst({
+  const currentUser = {};
+  /*   const currentUser = await db.query.user.findFirst({
     where: eq(user.id, session.user.id),
   });
 
@@ -81,9 +80,8 @@ export const signUp = async (
 };
 
 export const getUsers = async (organizationId: string) => {
-
   try {
-/*     const members = await db.query.member.findMany({
+    /*     const members = await db.query.member.findMany({
       where: eq(member.organizationId, organizationId),
     });
 
@@ -96,7 +94,7 @@ export const getUsers = async (organizationId: string) => {
       ),
     }); */
 
-    return {organizationId};
+    return { organizationId };
   } catch (error) {
     console.error(error);
     return [];

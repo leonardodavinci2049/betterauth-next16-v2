@@ -1,6 +1,6 @@
 "use server";
 
-type Role = ['owner'] | ['admin'] | ['member'];
+type Role = ["owner"] | ["admin"] | ["member"];
 
 import { auth } from "@/lib/auth";
 import { isAdmin } from "./permissions";
@@ -39,7 +39,7 @@ export const removeMember = async (memberId: string) => {
 
     return {
       success: true,
-      error: null,
+      error: memberId,
     };
   } catch (error) {
     console.error(error);

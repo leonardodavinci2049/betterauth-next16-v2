@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { lastLoginMethod , organization } from "better-auth/plugins";
+import { lastLoginMethod, organization } from "better-auth/plugins";
 import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 

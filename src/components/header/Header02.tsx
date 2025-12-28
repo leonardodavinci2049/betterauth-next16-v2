@@ -68,7 +68,7 @@ export default function Header02() {
                   href="/dashboard"
                   className={buttonVariants({ variant: "default" })}
                 >
-                 Dashboard
+                  Dashboard
                 </Link>
               </div>
             </div>

@@ -64,12 +64,12 @@ export function SignupForm({
     const { success, message } = await signUp(
       values.email,
       values.password,
-      values.username
+      values.username,
     );
 
     if (success) {
       toast.success(
-        `${message as string} Please check your email for verification.`
+        `${message as string} Please check your email for verification.`,
       );
       router.push("/dashboard");
     } else {
