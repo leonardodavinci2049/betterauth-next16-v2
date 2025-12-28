@@ -56,7 +56,7 @@ export const signIn = async (email: string, password: string) => {
 export const signUp = async (
   email: string,
   password: string,
-  username: string
+  username: string,
 ) => {
   try {
     await auth.api.signUpEmail({
@@ -91,8 +91,8 @@ export const getUsers = async (organizationId: string) => {
       where: not(
         inArray(
           user.id,
-          members.map((m) => m.userId)
-        )
+          members.map((m) => m.userId),
+        ),
       ),
     });
 

@@ -15,7 +15,7 @@ export async function getOrganizations() {
   const organizations = await db.query.organization.findMany({
     where: inArray(
       organization.id,
-      members.map((m) => m.organizationId)
+      members.map((m) => m.organizationId),
     ),
   });
 
