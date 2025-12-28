@@ -65,10 +65,10 @@ export default function Header02() {
               </Suspense>
               <div className="flex gap-2">
                 <Link
-                  href="/test-procedure"
+                  href="/dashboard"
                   className={buttonVariants({ variant: "default" })}
                 >
-                  Test Procedures
+                 Dashboard
                 </Link>
               </div>
             </div>
