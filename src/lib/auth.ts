@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { lastLoginMethod, organization } from "better-auth/plugins";
+import { lastLoginMethod , organization } from "better-auth/plugins";
 import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 
@@ -26,7 +26,23 @@ export const auth = betterAuth({
     connectionLimit: 10,
     queueLimit: 0,
   }),
-
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const activeOrganization = await getActiveOrganization(
+            session.userId,
+          );
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: activeOrganization?.id,
+            },
+          };
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
@@ -55,22 +71,10 @@ export const auth = betterAuth({
     },
     sendOnSignUp: true,
   },
-
-  databaseHooks: {
-    session: {
-      create: {
-        before: async (session) => {
-          const activeOrganization = await getActiveOrganization(
-            session.userId,
-          );
-          return {
-            data: {
-              ...session,
-              activeOrganizationId: activeOrganization?.id,
-            },
-          };
-        },
-      },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
 
