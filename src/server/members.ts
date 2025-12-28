@@ -1,8 +1,7 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-import { db } from "@/db/drizzle";
-import { member, type Role } from "@/db/schema";
+type Role = ['owner'] | ['admin'] | ['member'];
+
 import { auth } from "@/lib/auth";
 import { isAdmin } from "./permissions";
 
@@ -36,7 +35,7 @@ export const removeMember = async (memberId: string) => {
   }
 
   try {
-    await db.delete(member).where(eq(member.id, memberId));
+    // await db.delete(member).where(eq(member.id, memberId));
 
     return {
       success: true,

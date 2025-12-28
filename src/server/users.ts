@@ -1,10 +1,9 @@
 "use server";
 
-import { eq, inArray, not } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/db/drizzle";
-import { member, user } from "@/db/schema";
+
+
 import { auth } from "@/lib/auth";
 
 export const getCurrentUser = async () => {
@@ -15,15 +14,15 @@ export const getCurrentUser = async () => {
   if (!session) {
     redirect("/login");
   }
-
-  const currentUser = await db.query.user.findFirst({
+const currentUser ={};
+/*   const currentUser = await db.query.user.findFirst({
     where: eq(user.id, session.user.id),
   });
 
   if (!currentUser) {
     redirect("/login");
   }
-
+ */
   return {
     ...session,
     currentUser,
@@ -82,8 +81,9 @@ export const signUp = async (
 };
 
 export const getUsers = async (organizationId: string) => {
+
   try {
-    const members = await db.query.member.findMany({
+/*     const members = await db.query.member.findMany({
       where: eq(member.organizationId, organizationId),
     });
 
@@ -94,9 +94,9 @@ export const getUsers = async (organizationId: string) => {
           members.map((m) => m.userId),
         ),
       ),
-    });
+    }); */
 
-    return users;
+    return {organizationId};
   } catch (error) {
     console.error(error);
     return [];
