@@ -1,14 +1,15 @@
 "use server";
 
-type Role = ["owner"] | ["admin"] | ["member"];
-
+import { eq } from "drizzle-orm";
+import { db } from "@/db/drizzle";
+import { member, type Role } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "./permissions";
 
 export const addMember = async (
   organizationId: string,
   userId: string,
-  role: Role,
+  role: Role
 ) => {
   try {
     await auth.api.addMember({
@@ -35,11 +36,11 @@ export const removeMember = async (memberId: string) => {
   }
 
   try {
-    // await db.delete(member).where(eq(member.id, memberId));
+    await db.delete(member).where(eq(member.id, memberId));
 
     return {
       success: true,
-      error: memberId,
+      error: null,
     };
   } catch (error) {
     console.error(error);

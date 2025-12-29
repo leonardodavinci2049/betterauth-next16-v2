@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?   @db.Text
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now())
+  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model invitation {
+  id             String       @id
+  organizationId String
+  teamId         String?
+  email          String       @db.VarChar(300)
+  role           String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  user           user         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
+  @@index([inviterId])
+  @@index([organizationId])
+}
+
+model member {
+  id             String       @id
+  organizationId String
+  userId         String
+  role           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           user         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model organization {
+  id               String             @id
+  name             String             @db.Text
+  slug             String?            @db.Text
+  logo             String?            @db.Text
+  createdAt        DateTime?
+  metadata         String?            @db.Text
+  invitation       invitation[]
+  member           member[]
+  organizationrole organizationrole[]
+  team             team[]
+}
+
+model organizationrole {
+  id                  String       @id
+  organizationId      String
+  organizationRolecol String?
+  role                String?
+  permission          String?
+  createdAt           DateTime?    @db.DateTime(0)
+  updatedAt           DateTime?    @db.DateTime(0)
+  organization        organization @relation(fields: [organizationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organizationId], map: "organizationrole_organizationId_fkey_idx")
+}
+
+model session {
+  id                   String   @id
+  expiresAt            DateTime
+  token                String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @default(now())
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  impersonatedBy       String?
+  activeOrganizationId String?
+  activeTeamId         String?
+  user                 user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model team {
+  id             String       @id
+  name           String?
+  organizationId String
+  createdAt      DateTime?    @db.DateTime(0)
+  updatedAt      DateTime?    @db.DateTime(0)
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teammember     teammember[]
+
+  @@index([organizationId], map: "team_organizationId_fkey_idx")
+}
+
+model teammember {
+  id        String    @id
+  teamId    String
+  userId    String
+  createdAt DateTime? @db.DateTime(0)
+  team      team      @relation(fields: [teamId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      user      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([teamId], map: "teammember_teamId_fkey_idx")
+  @@index([userId], map: "teammember_userId_fkey_idx")
+}
+
+model twofactor {
+  id          String  @id
+  userId      String
+  secret      String? @db.Text
+  backupCodes String  @db.Text
+  user        user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "twoFactor_userId_fkey")
+
+  @@index([userId], map: "twoFactor_userId_idx")
+}
+
+model user {
+  id               String       @id
+  name             String       @db.VarChar(300)
+  email            String       @unique
+  emailVerified    Boolean      @default(false)
+  image            String?      @db.Text
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @default(now())
+  twoFactorEnabled Boolean      @default(false)
+  role             String?
+  banned           Boolean?
+  banReason        String?
+  banExpires       DateTime?
+  account          account[]
+  invitation       invitation[]
+  member           member[]
+  session          session[]
+  teammember       teammember[]
+  twofactor        twofactor[]
+}
+
+model verification {
+  id         String   @id
+  identifier String?  @db.Text
+  value      String?  @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+}
