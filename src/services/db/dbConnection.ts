@@ -54,11 +54,11 @@ class DatabaseService {
 
     try {
       const config: PoolOptions = {
-        host: envs.DB_MYSQL_HOST,
-        port: envs.DB_MYSQL_PORT,
-        database: envs.DB_MYSQL_DATABASE,
-        user: envs.DB_MYSQL_USER,
-        password: envs.DB_MYSQL_PASSWORD,
+        host: envs.DATABASE_HOST,
+        port: envs.DATABASE_PORT,
+        database: envs.DATABASE_NAME,
+        user: envs.DATABASE_USER,
+        password: envs.DATABASE_PASSWORD,
         waitForConnections: true,
         connectionLimit: 5,
         maxIdle: 2,

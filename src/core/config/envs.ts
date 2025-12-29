@@ -32,14 +32,14 @@ const envsSchema = z.object({
     .pipe(z.number().positive("TYPE_BUSINESS must be a positive number")),
 
   // Database MySQL
-  DB_MYSQL_HOST: z.string().min(1, "DB_MYSQL_HOST is required"),
-  DB_MYSQL_PORT: z
+  DATABASE_HOST: z.string().min(1, "DATABASE_HOST is required"),
+  DATABASE_PORT: z
     .string()
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().positive("DB_MYSQL_PORT must be a positive number")),
-  DB_MYSQL_DATABASE: z.string().min(1, "DB_MYSQL_DATABASE is required"),
-  DB_MYSQL_USER: z.string().min(1, "DB_MYSQL_USER is required"),
-  DB_MYSQL_PASSWORD: z.string().min(1, "DB_MYSQL_PASSWORD is required"),
+    .pipe(z.number().positive("DATABASE_PORT must be a positive number")),
+  DATABASE_NAME: z.string().min(1, "DATABASE_NAME is required"),
+  DATABASE_USER: z.string().min(1, "DATABASE_USER is required"),
+  DATABASE_PASSWORD: z.string().min(1, "DATABASE_PASSWORD is required"),
 
   // BETTER_AUTH
   BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL must be a valid URL"),
@@ -86,11 +86,11 @@ if (typeof window === "undefined") {
     USER_ID: "",
     PERSON_ID: 0,
     TYPE_BUSINESS: 0,
-    DB_MYSQL_HOST: "",
-    DB_MYSQL_PORT: 0,
-    DB_MYSQL_DATABASE: "",
-    DB_MYSQL_USER: "",
-    DB_MYSQL_PASSWORD: "",
+    DATABASE_HOST: "",
+    DATABASE_PORT: 0,
+    DATABASE_NAME: "",
+    DATABASE_USER: "",
+    DATABASE_PASSWORD: "",
     BETTER_AUTH_URL: "",
     BETTER_AUTH_SECRET: "",
     GITHUB_CLIENT_ID: "",
@@ -111,11 +111,11 @@ export const envs = {
   USER_ID: envVars.USER_ID,
   PERSON_ID: envVars.PERSON_ID,
   TYPE_BUSINESS: envVars.TYPE_BUSINESS,
-  DB_MYSQL_HOST: envVars.DB_MYSQL_HOST,
-  DB_MYSQL_PORT: envVars.DB_MYSQL_PORT,
-  DB_MYSQL_DATABASE: envVars.DB_MYSQL_DATABASE,
-  DB_MYSQL_USER: envVars.DB_MYSQL_USER,
-  DB_MYSQL_PASSWORD: envVars.DB_MYSQL_PASSWORD,
+  DATABASE_HOST: envVars.DATABASE_HOST,
+  DATABASE_PORT: envVars.DATABASE_PORT,
+  DATABASE_NAME: envVars.DATABASE_NAME,
+  DATABASE_USER: envVars.DATABASE_USER,
+  DATABASE_PASSWORD: envVars.DATABASE_PASSWORD,
   BETTER_AUTH_URL: envVars.BETTER_AUTH_URL,
   BETTER_AUTH_SECRET: envVars.BETTER_AUTH_SECRET,
   GITHUB_CLIENT_ID: envVars.GITHUB_CLIENT_ID,

@@ -17,11 +17,11 @@ import { admin, member, owner } from "./auth/permissions";
 export const auth = betterAuth({
   secret: envs.BETTER_AUTH_SECRET,
   database: createPool({
-    host: envs.DB_MYSQL_HOST,
-    port: envs.DB_MYSQL_PORT,
-    user: envs.DB_MYSQL_USER,
-    password: envs.DB_MYSQL_PASSWORD,
-    database: envs.DB_MYSQL_DATABASE,
+    host: envs.DATABASE_HOST,
+    port: envs.DATABASE_PORT,
+    user: envs.DATABASE_USER,
+    password: envs.DATABASE_PASSWORD,
+    database: envs.DATABASE_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
