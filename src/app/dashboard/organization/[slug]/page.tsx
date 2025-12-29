@@ -1,7 +1,7 @@
-import AllUsers from "@/components/all-users";
-import MembersTable from "@/components/members-table";
 import { getOrganizationBySlug } from "@/server/organizations";
 import { getUsers } from "@/server/users";
+import AllUsers from "./components/all-users";
+import MembersTable from "./components/members-table";
 
 type Params = Promise<{ slug: string }>;
 
