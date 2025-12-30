@@ -1,22 +1,27 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-import { db } from "@/db/drizzle";
-import { member, type Role } from "@/db/schema";
+import type { Role } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { isAdmin } from "./permissions";
+
+const roleMap: Record<Role, "owner" | "admin" | "member"> = {
+  ADMIN: "admin",
+  MEMBER: "member",
+  BILLING: "member",
+};
 
 export const addMember = async (
   organizationId: string,
   userId: string,
-  role: Role
+  role: Role,
 ) => {
   try {
     await auth.api.addMember({
       body: {
         userId,
         organizationId,
-        role,
+        role: roleMap[role],
       },
     });
   } catch (error) {
@@ -36,7 +41,11 @@ export const removeMember = async (memberId: string) => {
   }
 
   try {
-    await db.delete(member).where(eq(member.id, memberId));
+    await prisma.member.delete({
+      where: {
+        id: memberId,
+      },
+    });
 
     return {
       success: true,

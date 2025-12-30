@@ -20,6 +20,11 @@ export default function AllUsers({ users, organizationId }: AllUsersProps) {
   const handleInviteMember = async (user: User) => {
     try {
       setIsLoading(true);
+      if (!user.email) {
+        setIsLoading(false);
+        toast.error("User has no email address");
+        return;
+      }
       const { error } = await authClient.organization.inviteMember({
         email: user.email,
         role: "member",

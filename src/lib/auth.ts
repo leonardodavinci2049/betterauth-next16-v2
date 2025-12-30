@@ -15,7 +15,6 @@ const resend = new Resend(process.env.RESEND_API_KEY as string);
 import { admin, member, owner } from "./auth/permissions";
 import { prisma } from "./prisma";
 
-
 export const auth = betterAuth({
   secret: envs.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {

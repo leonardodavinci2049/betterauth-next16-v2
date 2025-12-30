@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ResetPasswordForm } from "./components/reset-password-form";
 
-
 export default function LoginPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -22,7 +21,7 @@ export default function LoginPage() {
           </div>
           Better Auth Starter
         </Link>
-        <ResetPasswordForm />
+        {/* <ResetPasswordForm /> */}
       </div>
     </div>
   );

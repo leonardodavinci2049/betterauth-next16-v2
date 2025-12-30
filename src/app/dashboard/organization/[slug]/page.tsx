@@ -14,7 +14,7 @@ export default async function OrganizationPage({ params }: { params: Params }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4 py-10">
       <h1 className="font-bold text-2xl">{organization?.name}</h1>
-      <MembersTable members={organization?.members || []} />
+      <MembersTable members={organization?.member || []} />
       <AllUsers organizationId={organization?.id || ""} users={users} />
     </div>
   );
