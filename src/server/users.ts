@@ -31,13 +31,17 @@ export const getCurrentUser = async () => {
 };
 
 export const signIn = async (email: string, password: string) => {
+
+  console.log('signIn: ', email, password);
   try {
-    await auth.api.signInEmail({
+  const response  = await auth.api.signInEmail({
       body: {
         email,
         password,
       },
     });
+
+    console.log('signInEmail: ', response );
 
     return {
       success: true,
@@ -45,7 +49,8 @@ export const signIn = async (email: string, password: string) => {
     };
   } catch (error) {
     const e = error as Error;
-
+console.log('signInEmail1 error: ', e );
+console.log('signInEmail2 error: ', e.message );
     return {
       success: false,
       message: e.message || "An unknown error occurred.",

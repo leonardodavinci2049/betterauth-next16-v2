@@ -51,7 +51,7 @@ export const auth = betterAuth({
         }),
       });
     },
-    requireEmailVerification: true,
+    requireEmailVerification: false,
   },
 
   emailVerification: {
