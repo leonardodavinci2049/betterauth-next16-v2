@@ -15,7 +15,6 @@ type MembersTableProps = {
 };
 
 export default function MembersTable({ members }: MembersTableProps) {
-
   return (
     <Table>
       <TableCaption>A list of organization members.</TableCaption>

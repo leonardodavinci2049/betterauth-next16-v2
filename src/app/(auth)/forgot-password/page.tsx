@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ForgotPasswordForm } from "./components/forgot-password-form";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
