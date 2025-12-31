@@ -31,6 +31,32 @@ const envsSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().positive("TYPE_BUSINESS must be a positive number")),
 
+  // INFO DEVELOPER - Variáveis públicas do desenvolvedor (disponíveis no cliente)
+  // Usadas para exibir informações de contato do desenvolvedor
+  NEXT_PUBLIC_DEVELOPER_NAME: z
+    .string()
+    .min(1, "NEXT_PUBLIC_DEVELOPER_NAME is required"),
+  NEXT_PUBLIC_DEVELOPER_URL: z
+    .string()
+    .url("NEXT_PUBLIC_DEVELOPER_URL must be a valid URL"),
+
+  // INFO COMPANY - Variáveis públicas da empresa (disponíveis no cliente)
+  // Usadas para exibir informações de contato da empresa
+  NEXT_PUBLIC_COMPANY_NAME: z
+    .string()
+    .min(1, "NEXT_PUBLIC_COMPANY_NAME is required"),
+  NEXT_PUBLIC_COMPANY_PHONE: z
+    .string()
+    .min(10, "NEXT_PUBLIC_COMPANY_PHONE must have at least 10 characters")
+    .max(20, "NEXT_PUBLIC_COMPANY_PHONE must have at most 20 characters"),
+  NEXT_PUBLIC_COMPANY_EMAIL: z
+    .string()
+    .email("NEXT_PUBLIC_COMPANY_EMAIL must be a valid email"),
+  NEXT_PUBLIC_COMPANY_WHATSAPP: z
+    .string()
+    .min(10, "NEXT_PUBLIC_COMPANY_WHATSAPP must have at least 10 characters")
+    .max(20, "NEXT_PUBLIC_COMPANY_WHATSAPP must have at most 20 characters"),
+
   // Database MySQL
   DATABASE_HOST: z.string().min(1, "DATABASE_HOST is required"),
   DATABASE_PORT: z
@@ -51,8 +77,12 @@ const envsSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
   GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
 
-  // Resend
+  // Resend Email Configuration
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+  EMAIL_SENDER_NAME: z.string().min(1, "EMAIL_SENDER_NAME is required"),
+  EMAIL_SENDER_ADDRESS: z
+    .string()
+    .email("EMAIL_SENDER_ADDRESS must be a valid email"),
 });
 
 // Inferir o tipo automaticamente a partir do schema
@@ -85,6 +115,16 @@ if (typeof window === "undefined") {
     MEMBER_ID: "",
     USER_ID: "",
     PERSON_ID: 0,
+    // Estas variáveis públicas PODEM ser acessadas no cliente
+    NEXT_PUBLIC_DEVELOPER_NAME: process.env.NEXT_PUBLIC_DEVELOPER_NAME || "",
+    NEXT_PUBLIC_DEVELOPER_URL: process.env.NEXT_PUBLIC_DEVELOPER_URL || "",
+
+    // Informações da empresa - também disponíveis no cliente
+    NEXT_PUBLIC_COMPANY_NAME: process.env.NEXT_PUBLIC_COMPANY_NAME || "",
+    NEXT_PUBLIC_COMPANY_PHONE: process.env.NEXT_PUBLIC_COMPANY_PHONE || "",
+    NEXT_PUBLIC_COMPANY_EMAIL: process.env.NEXT_PUBLIC_COMPANY_EMAIL || "",
+    NEXT_PUBLIC_COMPANY_WHATSAPP:
+      process.env.NEXT_PUBLIC_COMPANY_WHATSAPP || "",
     TYPE_BUSINESS: 0,
     DATABASE_HOST: "",
     DATABASE_PORT: 0,
@@ -98,6 +138,8 @@ if (typeof window === "undefined") {
     GOOGLE_CLIENT_ID: "",
     GOOGLE_CLIENT_SECRET: "",
     RESEND_API_KEY: "",
+    EMAIL_SENDER_NAME: "",
+    EMAIL_SENDER_ADDRESS: "",
   };
 }
 
@@ -111,6 +153,16 @@ export const envs = {
   USER_ID: envVars.USER_ID,
   PERSON_ID: envVars.PERSON_ID,
   TYPE_BUSINESS: envVars.TYPE_BUSINESS,
+  // INFO DEVELOPER
+  NEXT_PUBLIC_DEVELOPER_NAME: envVars.NEXT_PUBLIC_DEVELOPER_NAME,
+  NEXT_PUBLIC_DEVELOPER_URL: envVars.NEXT_PUBLIC_DEVELOPER_URL,
+
+  // INFO COMPANY
+  NEXT_PUBLIC_COMPANY_NAME: envVars.NEXT_PUBLIC_COMPANY_NAME,
+  NEXT_PUBLIC_COMPANY_PHONE: envVars.NEXT_PUBLIC_COMPANY_PHONE,
+  NEXT_PUBLIC_COMPANY_EMAIL: envVars.NEXT_PUBLIC_COMPANY_EMAIL,
+  NEXT_PUBLIC_COMPANY_WHATSAPP: envVars.NEXT_PUBLIC_COMPANY_WHATSAPP,
+
   DATABASE_HOST: envVars.DATABASE_HOST,
   DATABASE_PORT: envVars.DATABASE_PORT,
   DATABASE_NAME: envVars.DATABASE_NAME,
@@ -123,4 +175,6 @@ export const envs = {
   GOOGLE_CLIENT_ID: envVars.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: envVars.GOOGLE_CLIENT_SECRET,
   RESEND_API_KEY: envVars.RESEND_API_KEY,
+  EMAIL_SENDER_NAME: envVars.EMAIL_SENDER_NAME,
+  EMAIL_SENDER_ADDRESS: envVars.EMAIL_SENDER_ADDRESS,
 };

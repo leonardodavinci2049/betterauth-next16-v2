@@ -10,7 +10,7 @@ import VerifyEmail from "@/components/emails/verify-email";
 import { envs } from "@/core/config/envs";
 import { getActiveOrganization } from "@/server/organizations";
 
-const resend = new Resend(process.env.RESEND_API_KEY as string);
+const resend = new Resend(envs.RESEND_API_KEY);
 
 import { admin, member, owner } from "./auth/permissions";
 import { prisma } from "./prisma";
@@ -40,8 +40,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+      const response = await resend.emails.send({
+        from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
         to: user.email,
         subject: "Reset your password",
         react: ForgotPasswordEmail({
@@ -50,6 +50,12 @@ export const auth = betterAuth({
           userEmail: user.email,
         }),
       });
+
+      if (response.error) {
+        console.error("Failed to send email:", response.error);
+      } else {
+        console.log("Email sent successfully:", response.data);
+      }
     },
     requireEmailVerification: false,
   },
@@ -57,7 +63,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       await resend.emails.send({
-        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
         to: user.email,
         subject: "Verify your email",
         react: VerifyEmail({ username: user.name, verifyUrl: url }),
@@ -78,7 +84,7 @@ export const auth = betterAuth({
         const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/accept-invitation/${data.id}`;
 
         await resend.emails.send({
-          from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+          from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
           to: data.email,
           subject: "You've been invited to join our organization",
           react: OrganizationInvitationEmail({
