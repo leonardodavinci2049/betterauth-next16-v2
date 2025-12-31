@@ -11,7 +11,7 @@ export const getCurrentUser = async () => {
   });
 
   if (!session) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const currentUser = await prisma.user.findUnique({
@@ -21,7 +21,7 @@ export const getCurrentUser = async () => {
   });
 
   if (!currentUser) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   return {

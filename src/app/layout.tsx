@@ -36,7 +36,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header02 />
+          {/* <Header02 /> */}
 
           <div className="container mx-auto px-4 py-12">{children}</div>
           <Toaster />

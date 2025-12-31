@@ -57,7 +57,7 @@ export const auth = betterAuth({
         console.log("Email sent successfully:", response.data);
       }
     },
-    requireEmailVerification: false,
+    requireEmailVerification: true,
   },
 
   emailVerification: {
