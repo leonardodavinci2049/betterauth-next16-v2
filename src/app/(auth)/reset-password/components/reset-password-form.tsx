@@ -1,15 +1,11 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import Form from "next/form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,22 +13,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { cn } from "@/lib/utils";
+import { type ResetPasswordState, resetPasswordAction } from "../actions";
 
-const formSchema = z.object({
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-});
+const initialState: ResetPasswordState = {
+  success: false,
+  message: "",
+};
 
 export function ResetPasswordForm({
   className,
@@ -41,40 +31,44 @@ export function ResetPasswordForm({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const token = searchParams.get("token") as string;
+  const token = searchParams.get("token") ?? "";
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, formAction] = useActionState(resetPasswordAction, initialState);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
-    if (values.password !== values.confirmPassword) {
-      toast.error("Passwords do not match");
-      setIsLoading(false);
-      return;
+  useEffect(() => {
+    if (state.message) {
+      if (state.success) {
+        toast.success(state.message);
+        router.push("/sign-in");
+      } else if (!state.errors) {
+        toast.error(state.message);
+      }
     }
+  }, [state, router]);
 
-    const { error } = await authClient.resetPassword({
-      newPassword: values.password,
-      token,
-    });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Password reset successfully");
-      router.push("/sign-in");
-    }
-
-    setIsLoading(false);
+  if (!token) {
+    return (
+      <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Invalid Reset Link</CardTitle>
+            <CardDescription>
+              The password reset link is invalid or has expired.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <Link
+                className="underline underline-offset-4"
+                href="/forgot-password"
+              >
+                Request a new password reset
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -85,54 +79,79 @@ export function ResetPasswordForm({
           <CardDescription>Enter your new password</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <FormField
-                    control={form.control}
+          <Form action={formAction} className="space-y-8">
+            <input type="hidden" name="token" value={token} />
+            <div className="grid gap-6">
+              <div className="grid gap-3">
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="password"
+                    className={state.errors?.password ? "text-destructive" : ""}
+                  >
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
                     name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    type="password"
+                    placeholder="********"
+                    required
+                    minLength={8}
+                    aria-describedby="password-error"
+                    aria-invalid={!!state.errors?.password}
                   />
-                </div>
-                <div className="grid gap-3">
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button className="w-full" disabled={isLoading} type="submit">
-                  {isLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    "Reset Password"
+                  {state.errors?.password && (
+                    <p
+                      id="password-error"
+                      className="text-sm text-destructive"
+                      role="alert"
+                    >
+                      {state.errors.password[0]}
+                    </p>
                   )}
-                </Button>
+                </div>
               </div>
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <Link className="underline underline-offset-4" href="/signup">
-                  Sign up
-                </Link>
+              <div className="grid gap-3">
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className={
+                      state.errors?.confirmPassword ? "text-destructive" : ""
+                    }
+                  >
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="********"
+                    required
+                    minLength={8}
+                    aria-describedby="confirmPassword-error"
+                    aria-invalid={!!state.errors?.confirmPassword}
+                  />
+                  {state.errors?.confirmPassword && (
+                    <p
+                      id="confirmPassword-error"
+                      className="text-sm text-destructive"
+                      role="alert"
+                    >
+                      {state.errors.confirmPassword[0]}
+                    </p>
+                  )}
+                </div>
               </div>
-            </form>
+              <SubmitButton pendingText="Resetting password...">
+                Reset Password
+              </SubmitButton>
+            </div>
+            <div className="text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link className="underline underline-offset-4" href="/signup">
+                Sign up
+              </Link>
+            </div>
           </Form>
         </CardContent>
       </Card>

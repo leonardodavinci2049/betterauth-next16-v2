@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CreateOrganizationForm } from "@/components/forms/create-organization-form";
+import { CreateOrganizationForm } from "@/components/forms/create-organization";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

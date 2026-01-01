@@ -1,13 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import Form from "next/form";
 import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
@@ -15,51 +12,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { cn } from "@/lib/utils";
+import { type ForgotPasswordState, forgotPasswordAction } from "../actions";
 
-const formSchema = z.object({
-  email: z.string().email(),
-});
+const initialState: ForgotPasswordState = {
+  success: false,
+  message: "",
+};
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, formAction] = useActionState(
+    forgotPasswordAction,
+    initialState,
+  );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
-    const { error } = await authClient.requestPasswordReset({
-      email: values.email,
-      redirectTo: "/reset-password",
-    });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Password reset email sent");
+  useEffect(() => {
+    if (state.message) {
+      if (state.success) {
+        toast.success(state.message);
+      } else if (!state.errors) {
+        toast.error(state.message);
+      }
     }
-
-    setIsLoading(false);
-  }
+  }, [state]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -71,39 +52,46 @@ export function ForgotPasswordForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <FormField
-                    control={form.control}
+          <Form action={formAction} className="space-y-8">
+            <div className="grid gap-6">
+              <div className="grid gap-3">
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="email"
+                    className={state.errors?.email ? "text-destructive" : ""}
+                  >
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
                     name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="m@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    aria-describedby="email-error"
+                    aria-invalid={!!state.errors?.email}
                   />
-                </div>
-                <Button className="w-full" disabled={isLoading} type="submit">
-                  {isLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    "Reset Password"
+                  {state.errors?.email && (
+                    <p
+                      id="email-error"
+                      className="text-sm text-destructive"
+                      role="alert"
+                    >
+                      {state.errors.email[0]}
+                    </p>
                   )}
-                </Button>
+                </div>
               </div>
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <Link className="underline underline-offset-4" href="/signup">
-                  Sign up
-                </Link>
-              </div>
-            </form>
+              <SubmitButton pendingText="Sending...">
+                Reset Password
+              </SubmitButton>
+            </div>
+            <div className="text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link className="underline underline-offset-4" href="/signup">
+                Sign up
+              </Link>
+            </div>
           </Form>
         </CardContent>
       </Card>
