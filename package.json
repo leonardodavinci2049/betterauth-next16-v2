@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "dotenv -e .env -- next start",
     "lint": "biome check",
-    "check": "npx biome check --write",
+    "format": "npx biome check --write",
     "test": "vitest"
   },
   "dependencies": {

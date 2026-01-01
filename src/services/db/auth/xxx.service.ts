@@ -20,7 +20,7 @@ const db = DatabaseService.getInstance();
 /**
  * Get client data based on Better Auth session
  */
-export async function getClienteBySession(
+export async function getxxxBySession(
   headers: Headers,
 ): Promise<ClientePessoa | null> {
   try {
