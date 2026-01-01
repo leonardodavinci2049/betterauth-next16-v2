@@ -1,5 +1,6 @@
 import "server-only";
 
+import { z } from "zod";
 import dbService, {
   ErroConexaoBancoDados,
   ErroExecucaoConsulta,
@@ -25,32 +26,65 @@ import {
 } from "./types/auth.types";
 
 // ============================================================================
-// Funções Utilitárias Privadas
+// Validation Schemas (Zod)
+// ============================================================================
+
+const IdSchema = z
+  .string()
+  .min(1, "ID é obrigatório")
+  .max(128, "ID muito longo");
+const IdArraySchema = z.array(IdSchema);
+const SlugSchema = z
+  .string()
+  .min(1, "Slug é obrigatório")
+  .max(255, "Slug muito longo")
+  .regex(/^[a-z0-9-]+$/, "Slug inválido");
+
+// ============================================================================
+// Private Utility Functions
 // ============================================================================
 
 /**
- * Valida se o ID fornecido é válido
+ * Validates if the provided ID is valid
  */
 function validateId(id: string, fieldName: string): void {
-  if (!id || typeof id !== "string" || id.trim().length === 0) {
+  const result = IdSchema.safeParse(id);
+  if (!result.success) {
     throw new AuthValidationError(
-      `${fieldName} é obrigatório e deve ser uma string válida`,
+      `${fieldName}: ${result.error.issues[0].message}`,
       fieldName,
     );
   }
 }
 
 /**
- * Valida se o array de IDs é válido
+ * Validates if the ID array is valid
  */
 function validateIdArray(ids: string[], fieldName: string): void {
-  if (!Array.isArray(ids)) {
-    throw new AuthValidationError(`${fieldName} deve ser um array`, fieldName);
+  const result = IdArraySchema.safeParse(ids);
+  if (!result.success) {
+    throw new AuthValidationError(
+      `${fieldName}: ${result.error.issues[0].message}`,
+      fieldName,
+    );
   }
 }
 
 /**
- * Trata erros e retorna resposta padronizada
+ * Validates if the provided slug is valid
+ */
+function validateSlug(slug: string, fieldName: string): void {
+  const result = SlugSchema.safeParse(slug);
+  if (!result.success) {
+    throw new AuthValidationError(
+      `${fieldName}: ${result.error.issues[0].message}`,
+      fieldName,
+    );
+  }
+}
+
+/**
+ * Handles errors and returns a standardized response
  */
 function handleError<T>(error: unknown, operation: string): ServiceResponse<T> {
   console.error(`[AuthService] Erro em ${operation}:`, error);
@@ -72,41 +106,50 @@ function handleError<T>(error: unknown, operation: string): ServiceResponse<T> {
   }
 
   if (error instanceof ErroExecucaoConsulta) {
+    // Sanitization: Do not expose technical query or database details in production
     return {
       success: false,
       data: null,
-      error: `Erro ao executar consulta: ${error.message}`,
+      error: "Erro ao processar a consulta no banco de dados",
     };
   }
 
   return {
     success: false,
     data: null,
-    error: error instanceof Error ? error.message : "Erro desconhecido",
+    error: "Ocorreu um erro interno inesperado",
   };
 }
 
 /**
- * Trata erros para operações de modificação
+ * Handles errors for modification operations
  */
 function handleModifyError(error: unknown, operation: string): ModifyResponse {
   console.error(`[AuthService] Erro em ${operation}:`, error);
 
+  if (error instanceof AuthValidationError) {
+    return {
+      success: false,
+      affectedRows: 0,
+      error: error.message,
+    };
+  }
+
   return {
     success: false,
     affectedRows: 0,
-    error: error instanceof Error ? error.message : "Erro desconhecido",
+    error: "Erro ao realizar operação de modificação",
   };
 }
 
 // ============================================================================
-// Métodos de Usuário (User)
+// User Methods
 // ============================================================================
 
 /**
- * Busca um usuário pelo ID
+ * Finds a user by ID
  *
- * Substitui: prisma.user.findUnique({ where: { id } })
+ * Replaces: prisma.user.findUnique({ where: { id } })
  *
  * @example
  * ```typescript
@@ -155,9 +198,9 @@ async function findUserById(params: {
 }
 
 /**
- * Busca todos os usuários excluindo IDs específicos
+ * Finds all users excluding specific IDs
  *
- * Substitui: prisma.user.findMany({ where: { id: { notIn: excludeIds } } })
+ * Replaces: prisma.user.findMany({ where: { id: { notIn: excludeIds } } })
  *
  * @example
  * ```typescript
@@ -172,7 +215,7 @@ async function findUsersExcludingIds(params: {
   try {
     validateIdArray(params.excludeUserIds, "excludeUserIds");
 
-    // Se o array estiver vazio, retorna todos os usuários
+    // If the array is empty, return all users
     if (params.excludeUserIds.length === 0) {
       const query = `
         SELECT 
@@ -191,7 +234,7 @@ async function findUsersExcludingIds(params: {
       };
     }
 
-    // Cria placeholders para os IDs a serem excluídos
+    // Create placeholders for the IDs to be excluded
     const placeholders = params.excludeUserIds.map(() => "?").join(", ");
 
     const query = `
@@ -220,13 +263,13 @@ async function findUsersExcludingIds(params: {
 }
 
 // ============================================================================
-// Métodos de Membro (Member)
+// Member Methods
 // ============================================================================
 
 /**
- * Busca todos os membros de uma organização
+ * Finds all members of an organization
  *
- * Substitui: prisma.member.findMany({ where: { organizationId } })
+ * Replaces: prisma.member.findMany({ where: { organizationId } })
  *
  * @example
  * ```typescript
@@ -264,9 +307,9 @@ async function findMembersByOrganization(params: {
 }
 
 /**
- * Busca o primeiro membro de um usuário
+ * Finds the first member of a user
  *
- * Substitui: prisma.member.findFirst({ where: { userId } })
+ * Replaces: prisma.member.findFirst({ where: { userId } })
  *
  * @example
  * ```typescript
@@ -313,9 +356,9 @@ async function findFirstMemberByUser(params: {
 }
 
 /**
- * Busca todos os membros de um usuário
+ * Finds all members of a user
  *
- * Substitui: prisma.member.findMany({ where: { userId } })
+ * Replaces: prisma.member.findMany({ where: { userId } })
  *
  * @example
  * ```typescript
@@ -353,15 +396,15 @@ async function findMembersByUser(params: {
 }
 
 /**
- * Deleta um membro pelo ID
+ * Deletes a member by ID
  *
- * Substitui: prisma.member.delete({ where: { id } })
+ * Replaces: prisma.member.delete({ where: { id } })
  *
  * @example
  * ```typescript
  * const result = await AuthService.deleteMember({ memberId: "member-456" });
  * if (result.success) {
- *   console.log(`Linhas afetadas: ${result.affectedRows}`);
+ *   console.log(`Affected rows: ${result.affectedRows}`);
  * }
  * ```
  */
@@ -392,13 +435,13 @@ async function deleteMember(params: {
 }
 
 // ============================================================================
-// Métodos de Organização (Organization)
+// Organization Methods
 // ============================================================================
 
 /**
- * Busca uma organização pelo ID
+ * Finds an organization by ID
  *
- * Substitui: prisma.organization.findFirst({ where: { id } })
+ * Replaces: prisma.organization.findFirst({ where: { id } })
  *
  * @example
  * ```typescript
@@ -444,9 +487,9 @@ async function findOrganizationById(params: {
 }
 
 /**
- * Busca organizações pelos IDs
+ * Finds organizations by IDs
  *
- * Substitui: prisma.organization.findMany({ where: { id: { in: ids } } })
+ * Replaces: prisma.organization.findMany({ where: { id: { in: ids } } })
  *
  * @example
  * ```typescript
@@ -495,9 +538,9 @@ async function findOrganizationsByIds(params: {
 }
 
 /**
- * Busca uma organização pelo slug
+ * Finds an organization by slug
  *
- * Substitui: prisma.organization.findFirst({ where: { slug } })
+ * Replaces: prisma.organization.findFirst({ where: { slug } })
  *
  * @example
  * ```typescript
@@ -510,7 +553,7 @@ async function findOrganizationBySlug(params: {
   slug: string;
 }): Promise<ServiceResponse<Organization | null>> {
   try {
-    validateId(params.slug, "slug");
+    validateSlug(params.slug, "slug");
 
     const query = `
       SELECT 
@@ -543,9 +586,9 @@ async function findOrganizationBySlug(params: {
 }
 
 /**
- * Busca uma organização pelo slug incluindo membros e seus usuários
+ * Finds an organization by slug including members and their users
  *
- * Substitui: prisma.organization.findFirst({
+ * Replaces: prisma.organization.findFirst({
  *   where: { slug },
  *   include: { member: { include: { user: true } } }
  * })
@@ -556,7 +599,7 @@ async function findOrganizationBySlug(params: {
  *   slug: "my-organization"
  * });
  * if (response.success && response.data) {
- *   console.log(response.data.member); // Array de membros com usuários
+ *   console.log(response.data.member); // Array of members with users
  * }
  * ```
  */
@@ -564,9 +607,9 @@ async function findOrganizationBySlugWithMembers(params: {
   slug: string;
 }): Promise<ServiceResponse<OrganizationWithMembers | null>> {
   try {
-    validateId(params.slug, "slug");
+    validateSlug(params.slug, "slug");
 
-    // Primeiro busca a organização
+    // First find the organization
     const orgQuery = `
       SELECT 
         id, name, slug, logo, createdAt, metadata
@@ -590,7 +633,7 @@ async function findOrganizationBySlugWithMembers(params: {
 
     const organization = mapOrganizationEntityToDto(orgResults[0]);
 
-    // Depois busca os membros com usuários
+    // Then find the members with users
     const membersQuery = `
       SELECT 
         m.id, m.organizationId, m.userId, m.role, m.createdAt, m.updatedAt,
@@ -630,13 +673,13 @@ async function findOrganizationBySlugWithMembers(params: {
 }
 
 // ============================================================================
-// Métodos Compostos (para operações complexas)
+// Compound Methods (for complex operations)
 // ============================================================================
 
 /**
- * Busca as organizações de um usuário através de suas memberships
+ * Finds a user's organizations through their memberships
  *
- * Combina:
+ * Combines:
  * - prisma.member.findMany({ where: { userId } })
  * - prisma.organization.findMany({ where: { id: { in: organizationIds } } })
  *
@@ -653,7 +696,7 @@ async function findUserOrganizations(params: {
   try {
     validateId(params.userId, "userId");
 
-    // Query otimizada com JOIN
+    // Optimized query with JOIN
     const query = `
       SELECT DISTINCT
         o.id, o.name, o.slug, o.logo, o.createdAt, o.metadata
@@ -678,9 +721,9 @@ async function findUserOrganizations(params: {
 }
 
 /**
- * Busca a organização ativa de um usuário (primeira organização encontrada)
+ * Finds the active organization of a user (first organization found)
  *
- * Combina:
+ * Combines:
  * - prisma.member.findFirst({ where: { userId } })
  * - prisma.organization.findFirst({ where: { id: memberUser.organizationId } })
  *
@@ -697,7 +740,7 @@ async function findActiveOrganization(params: {
   try {
     validateId(params.userId, "userId");
 
-    // Query otimizada com JOIN
+    // Optimized query with JOIN
     const query = `
       SELECT 
         o.id, o.name, o.slug, o.logo, o.createdAt, o.metadata
@@ -731,9 +774,9 @@ async function findActiveOrganization(params: {
 }
 
 /**
- * Busca usuários que não são membros de uma organização
+ * Finds users who are not members of an organization
  *
- * Combina:
+ * Combines:
  * - prisma.member.findMany({ where: { organizationId } })
  * - prisma.user.findMany({ where: { id: { notIn: memberUserIds } } })
  *
@@ -750,7 +793,7 @@ async function findNonMemberUsers(params: {
   try {
     validateId(params.organizationId, "organizationId");
 
-    // Query otimizada com subquery
+    // Optimized query with subquery
     const query = `
       SELECT 
         u.id, u.name, u.email, u.emailVerified, u.image, 
@@ -784,52 +827,52 @@ async function findNonMemberUsers(params: {
 // ============================================================================
 
 /**
- * AuthService - Serviço de acesso ao banco de dados para operações de autenticação
+ * AuthService - Database access service for authentication operations
  *
- * Esta namespace serve como ponte entre os server actions e o banco de dados MySQL,
- * substituindo as operações do Prisma por queries diretas usando mysql2.
+ * This namespace serves as a bridge between server actions and the MySQL database,
+ * replacing Prisma operations with direct queries using mysql2.
  *
  * @example
  * ```typescript
  * import { AuthService } from "@/services/db/auth/auth.service";
  *
- * // Buscar usuário por ID
+ * // Find user by ID
  * const response = await AuthService.findUserById({ userId: "user-123" });
  *
- * // Buscar organizações do usuário
+ * // Find user organizations
  * const orgs = await AuthService.findUserOrganizations({ userId: "user-123" });
  *
- * // Deletar membro
+ * // Delete member
  * const result = await AuthService.deleteMember({ memberId: "member-456" });
  * ```
  */
 export const AuthService = {
-  // Métodos de Usuário
+  // User Methods
   findUserById,
   findUsersExcludingIds,
 
-  // Métodos de Membro
+  // Member Methods
   findMembersByOrganization,
   findFirstMemberByUser,
   findMembersByUser,
   deleteMember,
 
-  // Métodos de Organização
+  // Organization Methods
   findOrganizationById,
   findOrganizationsByIds,
   findOrganizationBySlug,
   findOrganizationBySlugWithMembers,
 
-  // Métodos Compostos
+  // Compound Methods
   findUserOrganizations,
   findActiveOrganization,
   findNonMemberUsers,
 } as const;
 
-// Export default para facilitar importação
+// Export default for easier import
 export default AuthService;
 
-// Re-export types para facilitar uso
+// Re-export types for easier use
 export type {
   Member,
   MemberWithUser,
