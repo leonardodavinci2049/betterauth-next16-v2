@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { AuthService } from "@/services/db/auth/auth.service";
 
 export const getCurrentUser = async () => {
   const session = await auth.api.getSession({
@@ -14,19 +14,17 @@ export const getCurrentUser = async () => {
     redirect("/sign-in");
   }
 
-  const currentUser = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
+  const response = await AuthService.findUserById({
+    userId: session.user.id,
   });
 
-  if (!currentUser) {
+  if (!response.success || !response.data) {
     redirect("/sign-in");
   }
 
   return {
     ...session,
-    currentUser,
+    currentUser: response.data,
   };
 };
 
@@ -83,24 +81,13 @@ export const signUp = async (
 };
 
 export const getUsers = async (organizationId: string) => {
-  try {
-    const members = await prisma.member.findMany({
-      where: {
-        organizationId,
-      },
-    });
+  // Usando método otimizado que faz a busca em uma única query
+  const response = await AuthService.findNonMemberUsers({ organizationId });
 
-    const users = await prisma.user.findMany({
-      where: {
-        id: {
-          notIn: members.map((m) => m.userId),
-        },
-      },
-    });
-
-    return users;
-  } catch (error) {
-    console.error(error);
+  if (!response.success || !response.data) {
+    console.error(response.error);
     return [];
   }
+
+  return response.data;
 };

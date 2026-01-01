@@ -2,7 +2,7 @@
 
 import type { Role } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { AuthService } from "@/services/db/auth/auth.service";
 import { isAdmin } from "./permissions";
 
 const roleMap: Record<Role, "owner" | "admin" | "member"> = {
@@ -40,22 +40,18 @@ export const removeMember = async (memberId: string) => {
     };
   }
 
-  try {
-    await prisma.member.delete({
-      where: {
-        id: memberId,
-      },
-    });
+  const result = await AuthService.deleteMember({ memberId });
 
-    return {
-      success: true,
-      error: null,
-    };
-  } catch (error) {
-    console.error(error);
+  if (!result.success) {
+    console.error(result.error);
     return {
       success: false,
-      error: "Failed to remove member.",
+      error: result.error || "Failed to remove member.",
     };
   }
+
+  return {
+    success: true,
+    error: null,
+  };
 };

@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
+
 import { nextCookies } from "better-auth/next-js";
 import { lastLoginMethod, organization } from "better-auth/plugins";
+import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 
 import OrganizationInvitationEmail from "@/components/emails/organization-invitation";
@@ -13,13 +14,20 @@ import { getActiveOrganization } from "@/server/organizations";
 const resend = new Resend(envs.RESEND_API_KEY);
 
 import { admin, member, owner } from "./auth/permissions";
-import { prisma } from "./prisma";
 
 export const auth = betterAuth({
   secret: envs.BETTER_AUTH_SECRET,
-  database: prismaAdapter(prisma, {
-    provider: "mysql",
+  database: createPool({
+    host: envs.DATABASE_HOST,
+    port: envs.DATABASE_PORT,
+    user: envs.DATABASE_USER,
+    password: envs.DATABASE_PASSWORD,
+    database: envs.DATABASE_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
   }),
+
   databaseHooks: {
     session: {
       create: {
