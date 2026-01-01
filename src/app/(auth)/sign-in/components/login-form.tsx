@@ -31,6 +31,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+  
   const lastMethod = authClient.getLastUsedLoginMethod();
   const router = useRouter();
 
@@ -169,7 +171,7 @@ export function LoginForm({
             </Form>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
-              <Link className="underline underline-offset-4" href="/signup">
+              <Link className="underline underline-offset-4" href="/sign-up">
                 Sign up
               </Link>
             </div>
