@@ -40,5 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#others
+
+# others
+tasks
+/tasks
+.github/
 /docs
+/public
+ecosystem.config.js
