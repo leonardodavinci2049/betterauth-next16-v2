@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Features
+
+- 🔐 **Authentication with Better Auth** - Email/password and Google OAuth
+- 🔒 **Two-Factor Authentication (2FA)** - TOTP and OTP support for enhanced security
+- 👥 **Organization Management** - Create and manage organizations with role-based access
+- 📧 **Email Verification** - Verify user emails with customizable email templates
+- 🎨 **Modern UI** - Built with Tailwind CSS and Radix UI components
+- 🌙 **Dark Mode** - Theme switching support
+
 ## Getting Started
 
 First, run the development server:
@@ -28,6 +37,17 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Two-Factor Authentication
+
+This project includes full two-factor authentication support. Users can enable 2FA from their settings page to add an extra layer of security to their accounts.
+
+**Supported Methods:**
+- TOTP (Time-based One-Time Password) via authenticator apps
+- OTP (One-Time Password) via email
+- Backup codes for account recovery
+
+For detailed documentation, see [docs/TWO_FACTOR_AUTH.md](docs/TWO_FACTOR_AUTH.md).
 
 ## Deploy on Vercel
 
