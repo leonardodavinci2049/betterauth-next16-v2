@@ -90,8 +90,21 @@ export function TwoFactorSettings({
   };
 
   const copyBackupCodes = () => {
-    navigator.clipboard.writeText(backupCodes.join("\n"));
-    toast.success("Backup codes copied to clipboard");
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(backupCodes.join("\n"))
+        .then(() => {
+          toast.success("Backup codes copied to clipboard");
+        })
+        .catch(() => {
+          toast.error(
+            "Failed to copy backup codes. Please copy them manually.",
+          );
+        });
+    } else {
+      // Fallback for browsers that don't support clipboard API
+      toast.error("Clipboard not supported. Please copy the codes manually.");
+    }
   };
 
   return (
