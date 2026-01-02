@@ -1,18 +1,8 @@
-import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { LoginForm } from "./components/login-form";
+import { TwoFactorVerifyForm } from "./components/verify-form";
 
-export default async function LoginPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session) {
-    return redirect("/dashboard");
-  }
+export default function TwoFactorVerifyPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -31,7 +21,7 @@ export default async function LoginPage() {
           </div>
           Better Auth Starter
         </Link>
-        <LoginForm />
+        <TwoFactorVerifyForm />
       </div>
     </div>
   );

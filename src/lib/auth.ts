@@ -1,12 +1,13 @@
 import { betterAuth } from "better-auth";
 
 import { nextCookies } from "better-auth/next-js";
-import { lastLoginMethod, organization } from "better-auth/plugins";
+import { lastLoginMethod, organization, twoFactor } from "better-auth/plugins";
 import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 
 import OrganizationInvitationEmail from "@/components/emails/organization-invitation";
 import ForgotPasswordEmail from "@/components/emails/reset-password";
+import TwoFactorOTP from "@/components/emails/two-factor-otp";
 import VerifyEmail from "@/components/emails/verify-email";
 import { envs } from "@/core/config/envs";
 import { getActiveOrganization } from "@/server/organizations";
@@ -108,6 +109,21 @@ export const auth = betterAuth({
         owner,
         admin,
         member,
+      },
+    }),
+    twoFactor({
+      otpOptions: {
+        sendOTP: async ({ user, otp }) => {
+          await resend.emails.send({
+            from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
+            to: user.email,
+            subject: "Your Two-Factor Authentication Code",
+            react: TwoFactorOTP({
+              username: user.name,
+              otp,
+            }),
+          });
+        },
       },
     }),
     lastLoginMethod(),

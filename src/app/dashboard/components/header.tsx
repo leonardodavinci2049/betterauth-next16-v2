@@ -1,4 +1,7 @@
+import { Settings } from "lucide-react";
+import Link from "next/link";
 import { Logout } from "@/app/(auth)/logout/logout";
+import { Button } from "@/components/ui/button";
 import { getOrganizations } from "@/server/organizations";
 import { ModeSwitcher } from "./mode-switcher";
 import { OrganizationSwitcher } from "./organization-switcher";
@@ -10,6 +13,12 @@ export async function Header() {
     <header className="absolute top-0 right-0 flex w-full items-center justify-between p-4">
       <OrganizationSwitcher organizations={organizations} />
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/dashboard/settings">
+            <Settings className="h-5 w-5" />
+            <span className="sr-only">Settings</span>
+          </Link>
+        </Button>
         <Logout />
         <ModeSwitcher />
       </div>
