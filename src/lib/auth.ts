@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 
 import { nextCookies } from "better-auth/next-js";
-import { lastLoginMethod, organization } from "better-auth/plugins";
+import { lastLoginMethod, organization, twoFactor } from "better-auth/plugins";
 import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 
@@ -108,6 +108,18 @@ export const auth = betterAuth({
         owner,
         admin,
         member,
+      },
+    }),
+    twoFactor({
+      otpOptions: {
+        sendOTP: async ({ user, otp }) => {
+          await resend.emails.send({
+            from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
+            to: user.email,
+            subject: "Your Two-Factor Authentication Code",
+            html: `<p>Your verification code is: <strong>${otp}</strong></p><p>This code will expire in 5 minutes.</p>`,
+          });
+        },
       },
     }),
     lastLoginMethod(),

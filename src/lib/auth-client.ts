@@ -1,11 +1,20 @@
 import {
   lastLoginMethodClient,
   organizationClient,
+  twoFactorClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
   /** The base URL of the server (optional if you're using the same domain) */
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  plugins: [organizationClient(), lastLoginMethodClient()],
+  plugins: [
+    organizationClient(),
+    lastLoginMethodClient(),
+    twoFactorClient({
+      onTwoFactorRedirect: async () => {
+        window.location.href = "/two-factor/verify";
+      },
+    }),
+  ],
 });

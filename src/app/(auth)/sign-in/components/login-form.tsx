@@ -31,8 +31,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
-  
   const lastMethod = authClient.getLastUsedLoginMethod();
   const router = useRouter();
 
